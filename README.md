@@ -1,4 +1,4 @@
-# soprano.rpc
+# soprano.pubsub
 Publish / Subscription protocol for [soprano](https://www.npmjs.com/package/soprano)
 
 ## Install
