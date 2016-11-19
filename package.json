@@ -1,0 +1,32 @@
+{
+  "name": "soprano.pubsub",
+  "version": "1.0.0",
+  "description": "Publish / Subscription protocol for Soprano",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tlghn/soprano.pubsub.git"
+  },
+  "keywords": [
+    "publish",
+    "subscription",
+    "pub",
+    "sub",
+    "pubsub"
+  ],
+  "author": "Tolgahan ALBAYRAK",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tlghn/soprano.pubsub/issues"
+  },
+  "homepage": "https://github.com/tlghn/soprano.pubsub#readme",
+  "dependencies": {
+    "soprano": "^0.2.5"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0"
+  }
+}
