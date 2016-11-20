@@ -1,6 +1,6 @@
 {
   "name": "soprano.pubsub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Publish / Subscription protocol for Soprano",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/tlghn/soprano.pubsub#readme",
   "dependencies": {
-    "soprano": "^0.2.5"
+    "soprano": "^0.2.6"
   },
   "devDependencies": {
     "chai": "^3.5.0"
