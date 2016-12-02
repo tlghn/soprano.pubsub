@@ -13,22 +13,22 @@ npm i soprano.pubsub --save
 
 server.js
 
-```
+```javascript
 const Soprano = require('soprano');
 const PubSubProtocol = require('soprano.pubsub');
 
 const soprano = new Soprano();
 const pubSub = new PubSubProtocol(soprano);
 
-Soprano.run(function *() {
-    yield soprano.bind(pubSub);
-    let server = yield soprano.listen();
+(async function () {
+    await soprano.bind(pubSub);
+    let server = await soprano.listen();
 
     while(true){
-        yield Soprano.sleep(1000);
-        yield pubSub.publish('channelName', 'Hello World');
+        await Soprano.utils.sleep(1000);
+        await pubSub.publish('channelName', 'Hello World');
     }
-});
+})();
 
 
 ```
@@ -36,25 +36,25 @@ Soprano.run(function *() {
 
 client.js
 
-```
+```javascript
 const Soprano = require('soprano');
 const PubSubProtocol = require('soprano.pubsub');
 
-Soprano.run(function *() {
+(async function () {
     const soprano = new Soprano();
     const pubSub = new PubSubProtocol(soprano);
-    let controller = pubSub.connect();
+    let controller = await pubSub.connect();
 
     controller.on('message', function(channel){
         console.log(arguments);
     });
 
     // Subscription
-    let subscribedChannelCount = yield controller.subscribe('channelName', 'channelName2');
+    let subscribedChannelCount = await controller.subscribe('channelName', 'channelName2');
     console.log(subscribedChannelCount);
 
     // Unsubscription
-    subscribedChannelCount = yield controller.unsubscribe('channelName2');
+    subscribedChannelCount = await controller.unsubscribe('channelName2');
     console.log(subscribedChannelCount);
 });
 

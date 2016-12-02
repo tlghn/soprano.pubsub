@@ -22,20 +22,19 @@ class ClientController extends Soprano.Controller {
         }.bind(this));
     }
 
-    *subscribe() {
+    async subscribe() {
         let channels = Array.prototype.slice.call(arguments);
         if(!channels.length){
-            yield false;
-            return;
+            return false;
         }
         let set = this.getResource(SUBSCRIPTIONS);
         this.setResource(SUBSCRIPTIONS, new Set([...set].concat(channels)));
         let id = ID.next();
-        yield this._write({action: 'subscribe', channels, id});
-        yield this.when[`response_${id}`]();
+        await this._write({action: 'subscribe', channels, id});
+        return (await this.when[`response_${id}`]())[0];
     }
 
-    *unsubscribe() {
+    async unsubscribe() {
         let channels = Array.prototype.slice.call(arguments);
         let set = this.getResource(SUBSCRIPTIONS);
         if(!channels.length){
@@ -44,8 +43,7 @@ class ClientController extends Soprano.Controller {
         }
 
         if(!channels.length){
-            yield false;
-            return;
+            return false;
         }
 
         for(let channel of channels){
@@ -53,11 +51,11 @@ class ClientController extends Soprano.Controller {
         }
 
         let id = ID.next();
-        yield this._write({action: 'unsubscribe', channels, id});
-        yield this.when[`response_${id}`]();
+        await this._write({action: 'unsubscribe', channels, id});
+        return (await this.when[`response_${id}`]())[0];
     }
 
-    *_handle(err, data){
+    _handle(err, data){
         var result, name, id;
         if(err){
             result = err;
@@ -89,7 +87,7 @@ class ClientController extends Soprano.Controller {
         }
 
 
-        yield true;
+        return true;
     }
 }
 
@@ -105,20 +103,19 @@ class ServerController extends Soprano.Controller {
         return this.client.protocol.adapter;
     }
 
-    *sendError(err, id){
+    async sendError(err, id){
         let result = {error: Object.assign({name: err.name, message: err.message}, err), id};
-        yield this._write(result);
+        return await this._write(result);
     }
 
-    *sendResult(result, id){
-        yield this._write({result, id});
+    async sendResult(result, id){
+        return await this._write({result, id});
     }
 
-    *_handle(err, data){
+    async _handle(err, data){
 
         if(err){
-            yield this.sendError(err, data && data.id);
-            return;
+            return await this.sendError(err, data && data.id);
         }
 
         var channels;
@@ -126,7 +123,7 @@ class ServerController extends Soprano.Controller {
             case 'subscribe':
                 channels = new Set(data.channels);
                 channels = [...channels];
-                channels = yield this.adapter.setState(this.id, {script: (function (values) {
+                channels = await this.adapter.setState(this.id, {script: (function (values) {
                     if(!this.channels){
                         this.channels = new Set(values);
                     } else {
@@ -136,12 +133,11 @@ class ServerController extends Soprano.Controller {
                     }
                     return this.channels.size;
                 }).toString(), arg: channels});
-                yield this.sendResult(channels, data.id);
-                break;
+                return await this.sendResult(channels, data.id);
             case 'unsubscribe':
                 channels = new Set(data.channels);
                 channels = [...channels];
-                channels = yield this.adapter.setState(this.id, {script: (function (values) {
+                channels = await this.adapter.setState(this.id, {script: (function (values) {
                     if(!this.channels){
                         return 0;
                     } else {
@@ -151,16 +147,15 @@ class ServerController extends Soprano.Controller {
                     }
                     return this.channels.size;
                 }).toString(), arg: channels});
-                yield this.sendResult(channels, data.id);
-                break;
+                return await this.sendResult(channels, data.id);
             default:
-                yield this.sendError(new Soprano.errors.InvalidOperationError('Unknown action %s', data.action), data.id);
+                return await this.sendError(new Soprano.errors.InvalidOperationError('Unknown action %s', data.action), data.id);
         }
     }
 
 
-    *post(message){
-        yield this._write(message);
+    async post(message){
+        return await this._write(message);
     }
 }
 
@@ -174,17 +169,17 @@ class PubSubProtocol extends Soprano.FixedHeaderStreamProtocol {
         return this.getResource(Symbols.namespace);
     }
 
-    *connect(options = void 0){
-        yield this._execute(options);
+    async connect(options = void 0){
+        return await this._execute(options);
     }
 
-    *publish(channel){
+    async publish(channel){
         var args = Array.prototype.slice.call(arguments);
         var message = {name:'message', args};
-        let ids = yield this.adapter.findIds({script: function (channel) {
+        let ids = await this.adapter.findIds({script: function (channel) {
             return this.channels && this.channels.has(channel);
         }.toString(), arg: channel});
-        yield this.adapter.post(ids, message);
+        return await this.adapter.post(ids, message);
     }
 
     //noinspection JSMethodCanBeStatic

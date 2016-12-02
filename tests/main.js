@@ -16,36 +16,37 @@ const pubSub = new PubSubProtocol(soprano);
 var server, controller;
 
 it('Binding', function () {
-    return Soprano.run(function *() {
-        yield soprano.bind(pubSub);
-    })
+    return (async function () {
+        await soprano.bind(pubSub);
+    })();
 });
 
 it('Server Listen', function () {
-    return Soprano.run(function *() {
-        server = yield soprano.listen();
-    });
+    return (async function () {
+        server = await soprano.listen();
+    })();
 });
 
 
 it('Client Connection', function () {
-    return Soprano.run(function *() {
-        controller = yield pubSub.connect();
-    });
+    return (async function () {
+        controller = await pubSub.connect();
+    })();
 });
 
 it('Subscription', function () {
-    return Soprano.run(function *() {
-        let count = yield controller.subscribe('test', 'test 2', 'test 3');
+    return (async function () {
+        let count = await controller.subscribe('test', 'test 2', 'test 3');
         expect(count).to.equal(3);
-    });
+    })();
 });
 
+
 it('Unsubscription', function () {
-    return Soprano.run(function *() {
-        let count = yield controller.unsubscribe('test 2', 'test 3');
+    return (async function () {
+        let count = await controller.unsubscribe('test 2', 'test 3');
         expect(count).to.equal(1);
-    });
+    })();
 });
 
 
@@ -59,8 +60,8 @@ it('Publish / Message', function (done) {
         done();
     });
 
-    Soprano.run(function *() {
-        yield pubSub.publish('test', 1, 2, 3);
-    });
+    (async function() {
+        await pubSub.publish('test', 1, 2, 3);
+    })();
 });
 
