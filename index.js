@@ -14,11 +14,15 @@ class ClientController extends Soprano.Controller {
     constructor(sopranoClient){
         super(sopranoClient);
         this.setResource(SUBSCRIPTIONS, new Set());
-        sopranoClient.on('reconnected', function () {
+        sopranoClient.on('reconnected', async function () {
             let set = this.getResource(SUBSCRIPTIONS);
             let args = [...set];
             args.unshift(this);
-            Soprano.run(this.subscribe.bind.apply(this.subscribe, args), Soprano.SUPPRESS);
+            var f = this.subscribe.bind.apply(this, args);
+            try{
+                await f();
+            }catch (err){
+            }
         }.bind(this));
     }
 
